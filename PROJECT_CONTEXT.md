@@ -1,29 +1,43 @@
-# Individual Project Context
+# PROJECT_CONTEXT — Updated after 20 October 2026 supervision
 
-## Project
-**Title:** Marginal and condition-specific reliability of conformal prediction in chest X-ray classification
+## Title
+**Marginal and condition-specific reliability of conformal prediction in chest X-ray classification**
 
-**Supervisor:** Dr Nery Riquelme-Granada
+## Dataset
+CheXpert.
 
-## Research problem
-Conformal prediction gives marginal coverage guarantees, but good overall coverage can conceal under-coverage for individual conditions. The project investigates this in chest X-ray classification and studies how calibration choices, conformity scores and data splitting affect reliability and reproducibility.
+## Current experimental direction
+The project will use a reusable conformal-prediction pipeline and study how practical calibration choices affect reliability and efficiency.
 
-## Dataset direction
-CheXpert is the primary dataset. Initial work uses a simplified single-label multiclass formulation with approximately 10 selected conditions. Multi-label classification is a possible extension.
+### Calibration factors currently identified
+1. **Calibration unit**: image-level vs patient-level.
+2. **Calibration image composition**: mixed frontal+lateral vs frontal-only.
+3. **Calibration sample design**: repeated random splits, calibration-set size, repeated seeds.
 
-## Scope
-- Focus on uncertainty quantification rather than state-of-the-art classifier performance.
-- Use 2-3 relatively simple classifiers as controlled experimental models.
-- Implement split conformal prediction and verify nominal marginal coverage.
-- Measure condition-specific empirical coverage.
-- Compare calibration strategies and conformity scores.
-- Evaluate prediction-set size.
-- Repeat experiments across calibration splits / seeds.
-- Do not claim instance-wise conditional coverage or clinical diagnostic validity.
+## Core metrics
+- marginal coverage;
+- condition-specific empirical coverage;
+- subgroup / approximate conditional coverage;
+- prediction-set size and mean set size;
+- distribution of prediction-set sizes.
 
-## Immediate deliverables
-- Draft Report 1 before the next supervisor meeting.
-- Begin CheXpert structure / label investigation.
-- Project plan due 26 October 2026.
-- Share Overleaf project with supervisor.
-- Review risk assessment and data-management requirements.
+## Methodological position
+Patient-level calibration is likely more clinically meaningful because decisions concern patients, but image-level calibration remains a useful comparison. The project should quantify the cost or benefit of this choice.
+
+## Immediate technical task
+- inspect CheXpert's label structure;
+- count examples with exactly one positive label;
+- compute condition frequencies;
+- inspect frontal/lateral composition;
+- inspect patient repetition;
+- document results for Report 2.
+
+## Writing
+### Report 1
+Definitions, marginal coverage, split conformal, conditional coverage, impossibility of exact distribution-free conditional coverage, empirical/relaxed approximations.
+
+### Report 2
+CheXpert structure, label generation, uncertainty labels, multi-label structure, view types, patient structure, exploratory label statistics, and implications for conformal calibration.
+
+## Stretch work
+Multi-label conformal prediction, label hierarchy, structured uncertainty, knowledge-graph ideas, epistemic/aleatoric decomposition. These are not immediate priorities.

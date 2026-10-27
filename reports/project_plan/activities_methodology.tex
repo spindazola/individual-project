@@ -1,0 +1,29 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext,newtxmath}
+\usepackage[a4paper,inner=35mm,outer=24mm,top=24mm,bottom=24mm]{geometry}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlength{\parindent}{0pt}
+\pagestyle{plain}
+
+\begin{document}
+\begin{center}
+    {\large\textbf{Activities and Methodology}}\\[0.4em]
+    \textit{Part III Individual Project}
+\end{center}
+
+\textbf{Research and experimental methodology.}
+This project will investigate the reliability and reproducibility of conformal prediction for multiclass medical-image classification, with particular emphasis on the difference between marginal and condition-specific coverage. Initial work will review conformal prediction, adaptive prediction sets, class-conditional methods and probability calibration, alongside relevant medical-image classification literature. This will establish the assumptions, metrics and experimental design used throughout the project.
+
+Experiments will initially operate on stored class-probability outputs from a classifier, separating uncertainty-quantification research from the computational cost of image-model training. Split conformal prediction will provide the baseline. The initial nonconformity score will be $s(x,y)=1-\hat p_y(x)$, followed by Adaptive Prediction Sets (APS), which use the ranked cumulative class probabilities to adapt prediction-set size to the difficulty of an input. Class-conditional conformal calibration will subsequently be investigated to compare global marginal reliability with per-condition reliability.
+
+\textbf{Analysis and evaluation.}
+Methods will be evaluated using empirical marginal coverage, per-class coverage, mean and class-specific prediction-set size, and the proportions of singleton and multi-label prediction sets. Repeated calibration/test splits will quantify sampling variability and reproducibility. Sensitivity experiments will vary calibration-set size, target miscoverage $\alpha$, conformity score and, where feasible, classifier or dataset characteristics. Results will be reported with appropriate uncertainty summaries rather than from a single split.
+
+\textbf{Software, data and practical considerations.}
+Implementation will use Python and Jupyter with NumPy, pandas, scikit-learn, SciPy, Matplotlib and PyTorch where required; Git will provide version control and an experimental record. Existing open-source conformal-prediction implementations will be used as references and independently adapted for the project. Medical data will be handled only under the applicable dataset permissions and University requirements. No unusual physical health-and-safety risks are anticipated. Computational and environmental cost will be reduced by reusing model outputs, caching intermediate results and avoiding unnecessary retraining.
+
+\end{document}

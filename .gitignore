@@ -1,25 +1,50 @@
+# macOS
 .DS_Store
+
+# Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+venv/
+
+# Jupyter
 .ipynb_checkpoints/
-data/*
-!data/README.md
-*.csv
+
+# Raw / large data: never commit CheXpert data
+/data/*
+!/data/README.md
 *.npy
 *.npz
 *.pt
 *.pth
+*.ckpt
+*.h5
+*.hdf5
+*.parquet
+
+# Large archives / models
+*.tar
+*.tar.gz
+*.7z
+
+# LaTeX build files
 *.aux
 *.bbl
 *.bcf
 *.blg
+*.fdb_latexmk
+*.fls
 *.log
 *.out
 *.run.xml
 *.synctex.gz
 *.toc
+
+# Editor
 .vscode/
 .idea/
+
+# Secrets / environment
 .env
+.env.*

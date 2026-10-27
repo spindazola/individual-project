@@ -1,31 +1,39 @@
-# Tasks
+# TASKS — After 20 October 2026 supervision
 
-## This week
-- [ ] Write first draft of Report 1.
-- [ ] Reproduce the key split-conformal example in Jupyter.
-- [ ] Reproduce / understand APS.
-- [ ] Create a focused Mendeley library.
-- [ ] Export BibTeX to `literature/references.bib`.
-- [ ] Begin CheXpert dataset-structure notes for Report 2.
-- [ ] Review risk assessment and data-management requirements.
-- [ ] Finish PERT / milestones.
-- [ ] Share Overleaf project with supervisor.
+## Highest priority
+- [ ] Locate the CheXpert training CSV.
+- [ ] Run `02_chexpert_label_audit.ipynb`.
+- [ ] Verify label semantics in our copy.
+- [ ] Compute exactly-one-positive count and percentage.
+- [ ] Compute single-positive frequency by condition.
+- [ ] Compute positive / uncertain / negative / blank counts by observation.
+- [ ] Compare frontal vs lateral label frequencies.
+- [ ] Count unique patients and repeated-image structure.
+- [ ] Save tables/figures for Report 2.
 
 ## Report 1
-- [ ] Definition / setup of conformal prediction.
-- [ ] Marginal coverage guarantee.
-- [ ] Split conformal prediction.
-- [ ] Conditional coverage.
-- [ ] Impossibility of exact distribution-free conditional coverage.
-- [ ] Empirical / relaxed condition-specific approximations.
-- [ ] References for every substantive claim.
+- [ ] Finish first full draft.
+- [ ] Check every substantive claim has a citation.
+- [ ] Make marginal vs conditional coverage precise.
+- [ ] Explain coverage vs efficiency.
 
 ## Report 2
-- [ ] CheXpert motivation and medical-ML context.
-- [ ] What is being predicted?
-- [ ] Dataset size and structure.
-- [ ] 14 observations.
-- [ ] Label-generation process.
-- [ ] Uncertainty labels.
-- [ ] Validation / test annotation.
-- [ ] Label hierarchy.
+- [ ] Dataset overview.
+- [ ] 14 observations and label semantics.
+- [ ] Automated report labeler.
+- [ ] Frontal/lateral views.
+- [ ] Patient/study/image structure.
+- [ ] Single-positive statistics from our copy.
+- [ ] Explain why these statistics matter for the simplified classification task.
+
+## Later experiments
+- [ ] Baseline classifier.
+- [ ] Split conformal baseline.
+- [ ] APS.
+- [ ] Image-level calibration.
+- [ ] Patient-level calibration.
+- [ ] Mixed-view calibration.
+- [ ] Frontal-only calibration.
+- [ ] Coverage comparison.
+- [ ] Efficiency comparison.
+- [ ] Repeated calibration splits / sizes.

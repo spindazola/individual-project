@@ -1,22 +1,126 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage[margin=24mm,left=35mm]{geometry}
+
+\usepackage[left=35mm,right=24mm,top=24mm,bottom=24mm]{geometry}
 \usepackage{newtxtext,newtxmath}
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
 \usepackage[hidelinks]{hyperref}
 \usepackage[backend=biber,style=ieee]{biblatex}
 \addbibresource{../../literature/references.bib}
-\title{Report 1: Conformal Prediction}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+
+\title{Report 1: Foundations of Conformal Prediction}
 \author{Adrian Fernandes}
-\date{\today}
+\date{20 October 2026}
+
 \begin{document}
 \maketitle
+
 \section{Introduction}
-\section{Problem Setup and Definition}
+
+Modern classifiers often output a single predicted class together with a vector of scores or estimated probabilities. These outputs are useful for ranking classes, but they do not by themselves provide a finite-sample guarantee that quantifies how often the true label will be included in a reported uncertainty set. Conformal prediction (CP) provides a general framework for converting a model-dependent notion of uncertainty into a set-valued prediction with a distribution-free marginal coverage guarantee under exchangeability \cite{angelopoulos2023gentle}. The underlying predictive model can be a neural network, random forest, support-vector classifier, or another black-box model; the conformal step is applied after a model has produced a score that measures agreement between an input and a candidate label \cite{romano2020classification}.
+
+The distinction between \emph{marginal} and \emph{conditional} reliability is central to this project. A predictor may attain 90\% coverage over a population while still performing substantially worse on a particular class or subgroup. This is especially important in heterogeneous classification problems, where some classes may be rarer or intrinsically more difficult than others. The purpose of this report is therefore to introduce the split-conformal construction, state its marginal guarantee, explain why exact distribution-free conditional coverage is generally unattainable, and describe practical approximations that can be investigated empirically.
+
+\section{Problem Setup}
+
+Let $X \in \mathcal{X}$ denote an input and $Y \in \mathcal{Y}=\{1,\ldots,K\}$ its class label. Suppose a classifier has been trained on data that are separate from a calibration set and produces estimated class probabilities
+\[
+\hat{\pi}(x) = \bigl(\hat{\pi}_1(x),\ldots,\hat{\pi}_K(x)\bigr),
+\qquad \sum_{k=1}^{K}\hat{\pi}_k(x)=1.
+\]
+Rather than returning only $\arg\max_k \hat{\pi}_k(x)$, conformal prediction returns a set
+\[
+C(x) \subseteq \mathcal{Y}
+\]
+of plausible labels. The desired coverage level is selected in advance through a miscoverage rate $\alpha\in(0,1)$. For example, $\alpha=0.1$ corresponds to a nominal 90\% coverage target.
+
+A conformal procedure requires a score function $s(x,y)$ for which larger values represent poorer agreement between the input $x$ and candidate label $y$. A simple classification score is
+\begin{equation}
+    s(x,y)=1-\hat{\pi}_{y}(x),
+    \label{eq:lac-score}
+\end{equation}
+so a candidate class receives a small score when the underlying classifier assigns it high probability. Angelopoulos and Bates use this score as a basic classification example and emphasise that the validity of conformal prediction does not require the softmax probabilities themselves to be perfectly calibrated; the score primarily determines how useful or efficient the resulting sets are \cite{angelopoulos2023gentle}.
+
 \section{Marginal Coverage}
+
+The standard target of split conformal prediction is \emph{marginal coverage}:
+\begin{equation}
+    \Pr\!\left\{Y_{\mathrm{test}}\in C(X_{\mathrm{test}})\right\}
+    \geq 1-\alpha.
+    \label{eq:marginal}
+\end{equation}
+The probability in Equation~\eqref{eq:marginal} averages jointly over the random test example and the calibration sample. It is therefore a statement about long-run coverage over the overall population, not a guarantee that every class, subgroup, or individual region of feature space is covered at the same rate. This distinction is important: if one subgroup is covered 100\% of the time and another much less frequently, the average can still satisfy the nominal marginal target \cite{angelopoulos2023gentle}.
+
+The attraction of Equation~\eqref{eq:marginal} is that it is finite-sample and distribution-free subject to the exchangeability assumptions used by the conformal construction. In particular, no parametric form for the data distribution is required. However, validity and efficiency are distinct. A poor conformity score may still give a valid set, but the set can be unnecessarily large or uninformative. Angelopoulos and Bates therefore describe the score function as the main engineering choice controlling the practical usefulness of conformal prediction \cite{angelopoulos2023gentle}.
+
 \section{Split Conformal Prediction}
-\section{Conditional Coverage}
-\section{Why Exact Conditional Coverage Is Difficult}
-\section{Empirical and Relaxed Approaches}
-\section{Relevance to the Project}
+
+Split conformal prediction separates model fitting from conformal calibration. Let
+\[
+\{(X_i,Y_i)\}_{i=1}^{n}
+\]
+be a calibration set that was not used to fit the classifier. For each calibration example compute
+\[
+S_i=s(X_i,Y_i).
+\]
+For a desired error rate $\alpha$, define the finite-sample corrected quantile level
+\begin{equation}
+    \tau = \frac{\left\lceil(n+1)(1-\alpha)\right\rceil}{n},
+    \label{eq:quantile-level}
+\end{equation}
+and let $\hat q$ be the empirical $\tau$-quantile of $S_1,\ldots,S_n$, using the conservative upper order statistic. The prediction set for a new input is then
+\begin{equation}
+    C(x)=\{y\in\mathcal{Y}:s(x,y)\leq \hat q\}.
+    \label{eq:prediction-set}
+\end{equation}
+For the score in Equation~\eqref{eq:lac-score}, this is equivalent to including every candidate class satisfying
+\[
+\hat\pi_y(x)\geq 1-\hat q.
+\]
+Under exchangeability of the calibration examples and the new test point, this construction provides the marginal guarantee in Equation~\eqref{eq:marginal} \cite{angelopoulos2023gentle,romano2020classification}. The correction involving $n+1$ is important because it accounts for the rank of the unseen test score among the $n$ calibration scores and the test score itself.
+
+The split strategy is attractive experimentally because the conformal layer is model-independent: once probability outputs and labels are available, calibration can be studied without repeatedly retraining the underlying classifier. This is useful for the present project because it allows the reliability machinery to be implemented and tested independently before applying it to the chest X-ray pipeline.
+
+\section{Conditional Coverage and Its Limitation}
+
+A stronger target is \emph{conditional coverage}. At the most demanding level this asks for
+\begin{equation}
+    \Pr\!\left\{Y_{\mathrm{test}}\in C(X_{\mathrm{test}})\mid X_{\mathrm{test}}=x\right\}
+    \geq 1-\alpha
+    \quad\text{for all }x.
+    \label{eq:conditional}
+\end{equation}
+Unlike marginal coverage, Equation~\eqref{eq:conditional} requires reliability locally throughout the feature space. This would be highly desirable because it would prevent the global coverage rate from being obtained by over-covering easy examples while under-covering systematically difficult ones.
+
+However, exact distribution-free conditional coverage of this form is not generally available without additional assumptions. Angelopoulos and Bates explicitly note that conditional coverage is impossible in the most general setting and trace this limitation to earlier work including Vovk's analysis of conditional validity \cite{angelopoulos2023gentle,vovk2012conditional}. Consequently, the project should not interpret empirical class-wise coverage as evidence of full instance-wise conditional validity. Instead, the practical question is how closely a useful conformal procedure can approximate desirable conditional behaviour on scientifically meaningful groups.
+
+\section{Practical Approximations to Conditional Reliability}
+
+One practical relaxation is to evaluate or guarantee coverage over predefined groups rather than at every individual value of $X$. In classification, a particularly relevant case is \emph{class-conditional} coverage:
+\begin{equation}
+    \Pr\!\left\{Y_{\mathrm{test}}\in C(X_{\mathrm{test}})\mid Y_{\mathrm{test}}=y\right\}
+    \geq 1-\alpha,
+    \qquad y\in\{1,\ldots,K\}.
+    \label{eq:classconditional}
+\end{equation}
+Angelopoulos and Bates describe a class-balanced conformal construction that calibrates a separate score quantile within each true class and applies the corresponding threshold when deciding whether a candidate class belongs in the prediction set \cite{angelopoulos2023gentle}. This can provide class-wise error control under the required sampling assumptions, although the amount of calibration data available within rare classes becomes important.
+
+A second direction is to change the score function so that prediction-set size adapts more effectively to input difficulty. Romano, Sesia and Cand\`es develop an adaptive classification method based on cumulative sorted class probabilities \cite{romano2020classification}. The associated Adaptive Prediction Sets (APS) idea includes likely labels in descending probability order and uses a conformally calibrated cumulative-mass threshold. The motivation is not to replace the marginal guarantee with a full conditional guarantee, but to obtain sets that are smaller on easy inputs and larger on difficult inputs. Angelopoulos and Bates note that the simple probability-threshold score can under-cover hard subgroups and over-cover easy ones, whereas APS is intended to improve this adaptive behaviour \cite{angelopoulos2023gentle}.
+
+These observations suggest two complementary forms of evaluation. First, the project should report the formal marginal quantity that conformal prediction directly controls. Second, it should calculate empirical class-wise and difficulty-stratified coverage, together with prediction-set size, to identify where marginal validity may conceal uneven reliability. Repeating the analysis across different calibration samples and calibration-set sizes can then quantify how stable these empirical conclusions are.
+
+\section{Relevance to Chest X-Ray Classification}
+
+The intended application is chest X-ray classification using CheXpert. The original CheXpert dataset contains 224,316 radiographs from 65,240 patients and labels 14 radiographic observations as positive, negative, or uncertain using an automated labeler applied to radiology reports \cite{irvin2019chexpert}. The original task is therefore naturally multi-label rather than ordinary mutually exclusive multiclass classification. The initial project formulation will deliberately simplify this setting so that the behaviour of conformal prediction can first be studied in a controlled classification problem; the exact single-label construction remains to be agreed with the supervisor before preprocessing is finalised.
+
+The central experimental question is therefore not whether a classifier can maximise leaderboard accuracy or AUC, but whether conformal prediction sets with satisfactory overall coverage remain reliable when examined condition by condition. This makes marginal coverage, class-specific coverage, prediction-set size, conformity-score choice, calibration-set composition, and repeated-split stability the principal quantities of interest. The theoretical distinction developed in this report provides the basis for those experiments.
+
+\section{Conclusion}
+
+Split conformal prediction converts a model-derived score into a prediction set with finite-sample marginal coverage under exchangeability. This guarantee is powerful but deliberately limited: it is an average population guarantee and does not imply uniform reliability for every class or input. Exact distribution-free conditional coverage is generally impossible without stronger assumptions, motivating class-conditional guarantees, group-wise diagnostics, adaptive scores such as APS, and repeated empirical evaluation. These distinctions define the core reliability question that will be investigated in the chest X-ray experiments.
+
 \printbibliography
 \end{document}
